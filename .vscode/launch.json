@@ -5,6 +5,27 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "java",
+            "name": "CSVReadTest",
+            "request": "launch",
+            "mainClass": "CSVReadTest",
+            "projectName": "BusProject_5353025e"
+        },
+        {
+            "type": "java",
+            "name": "UserInterface",
+            "request": "launch",
+            "mainClass": "Project.UserInterface",
+            "projectName": "BusProject_5353025e"
+        },
+        {
+            "type": "java",
+            "name": "JFrameTest",
+            "request": "launch",
+            "mainClass": "JFrameTest",
+            "projectName": "BusProject_5353025e"
+        },
+        {
             "type": "jdk",
             "request": "launch",
             "name": "Launch Java App"
