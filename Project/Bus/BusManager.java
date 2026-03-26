@@ -9,30 +9,45 @@ import java.io.IOException;
 import java.io.File;
 
 public class BusManager {
-    public static ArrayList<BusClass> busList = new ArrayList<BusClass>();
+    public ArrayList<BusClass> busList = new ArrayList<BusClass>();
     static String filename = "Project\\Bus\\Bus.csv";
     static File file = new File(filename);
 
-    public static void listBuses() {
+    public BusManager() {
+
+    }
+
+    public void listBuses() {
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));
             String line, make, model, type;
             double fuelBurnRate, fuelCapacity, cruiseSpeed;
 
             while ((line = br.readLine()) != null) {
-                // Split by comma
+                System.out.println(line);
+                line = line.replace("\"", "");
                 String[] columns = line.split(", ");
+                for (String c : columns) {
+                    System.out.println(c);
+                }
                 make = columns[0];
                 model = columns[1];
                 type = columns[2];
                 fuelCapacity = Double.parseDouble(columns[3]);
                 fuelBurnRate = Double.parseDouble(columns[4]);
                 cruiseSpeed = Double.parseDouble(columns[5]);
-                BusClass bus = new BusClass(make, model, type, fuelCapacity, fuelBurnRate, cruiseSpeed);
+                BusClass bus = new BusClass(make, model, type, fuelCapacity, fuelBurnRate,
+                        cruiseSpeed);
+                busList.add(bus);
+
             }
             br.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public ArrayList returnBus() {
+        return busList;
     }
 }

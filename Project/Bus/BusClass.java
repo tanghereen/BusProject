@@ -64,7 +64,12 @@ public class BusClass {
     }
 
     public String displayBusInfo() {
-        String info = make + ", " + model + ", " + type + ", " + fuelCapacity;
+        String info = make + ", "
+                + model + ", "
+                + type + ", "
+                + fuelCapacity + ", "
+                + fuelBurnRate + ", "
+                + cruiseSpeed;
         return info;
     }
 }

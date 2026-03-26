@@ -2,6 +2,8 @@ package Project;
 
 import Project.Bus.BusManager;
 import Project.Bus.BusClass;
+
+import javax.management.openmbean.ArrayType;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.JTextComponent;
@@ -23,6 +25,12 @@ public class UserInterface {
     private JPanel loginPanel;
     private JPanel dashboardPanel;
     private JPanel buspanel;
+    private BusManager bManager;
+
+    public UserInterface() {
+        bManager = new BusManager();
+        bManager.listBuses();
+    }
 
     public static void main(String[] args) {
         JOptionPane.showMessageDialog(null,
@@ -37,7 +45,7 @@ public class UserInterface {
         // Set size for UI window
         frame = new JFrame("Route Planner");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(800, 600);
+        frame.setSize(1300, 1000);
         frame.setLocationRelativeTo(null);
 
         cardLayout = new CardLayout();
@@ -175,10 +183,18 @@ public class UserInterface {
         buspanel = new JPanel(new BorderLayout());
 
         // Current Buses Table
-        String tablename[] = { "Current Busses" };
+        String tablename[] = { "Make", "Model", "Type", "Fuel Capacity", "Fuel Burn Rate", "Cruise Speed" };
         busTable = new DefaultTableModel(tablename, 0);
         JTable table = new JTable(busTable);
         JScrollPane pane = new JScrollPane(table);
+
+        for (Object b : bManager.busList) {
+            String s = ((BusClass) b).displayBusInfo();
+            String[] col = s.split(", ");
+            System.out.println(s);
+            busTable.addRow(new Object[] { col[0], col[1], col[2], col[3], col[4], col[5]
+            });
+        }
 
         buspanel.add(pane, BorderLayout.EAST);
 
@@ -187,7 +203,7 @@ public class UserInterface {
         JPanel westWrapper = new JPanel();
         westWrapper.setLayout(new BoxLayout(westWrapper, BoxLayout.Y_AXIS));
 
-        Dimension boxSize = new Dimension(500, 150);
+        Dimension boxSize = new Dimension(800, 300);
 
         // 1. Input Boxes Panel (BoxLayout)
         JPanel inputPanel = new JPanel();

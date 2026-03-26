@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "BusManager",
+            "request": "launch",
+            "mainClass": "Project.Bus.BusManager",
+            "projectName": "BusProject_5353025e"
+        },
+        {
+            "type": "java",
             "name": "CSVReadTest",
             "request": "launch",
             "mainClass": "CSVReadTest",
