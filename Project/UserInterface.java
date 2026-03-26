@@ -179,90 +179,130 @@ public class UserInterface {
     }
 
     // Add / Edit / remove Bus page
+    // Add / Edit / remove Bus page
     private JPanel manageBus() {
-        buspanel = new JPanel(new BorderLayout());
+        JPanel buspanel = new JPanel(new BorderLayout());
 
-        // Current Buses Table
+        // --- Define Larger Fonts ---
+        Font labelFont = new Font("SansSerif", Font.BOLD, 18);
+        Font inputFont = new Font("SansSerif", Font.PLAIN, 18);
+        Font tableFont = new Font("SansSerif", Font.PLAIN, 16);
+
+        // --- Current Buses Table ---
         String tablename[] = { "Make", "Model", "Type", "Fuel Capacity", "Fuel Burn Rate", "Cruise Speed" };
-        busTable = new DefaultTableModel(tablename, 0);
+        DefaultTableModel busTable = new DefaultTableModel(tablename, 0);
         JTable table = new JTable(busTable);
+
+        // Make the table text and rows bigger
+        table.setFont(tableFont);
+        table.setRowHeight(30);
+        table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 16));
+
         JScrollPane pane = new JScrollPane(table);
 
         for (Object b : bManager.busList) {
             String s = ((BusClass) b).displayBusInfo();
             String[] col = s.split(", ");
             System.out.println(s);
-            busTable.addRow(new Object[] { col[0], col[1], col[2], col[3], col[4], col[5]
-            });
+            busTable.addRow(new Object[] { col[0], col[1], col[2], col[3], col[4], col[5] });
         }
 
-        buspanel.add(pane, BorderLayout.EAST);
+        // Change from EAST to CENTER so the table expands to fill the remaining space
+        buspanel.add(pane, BorderLayout.CENTER);
 
         // --- NEW WRAPPER PANEL FOR THE WEST SIDE ---
-        // We use a vertical BoxLayout so the inputs sit above the buttons
         JPanel westWrapper = new JPanel();
         westWrapper.setLayout(new BoxLayout(westWrapper, BoxLayout.Y_AXIS));
+        // Add a little padding around the left panel so it isn't squeezed against the
+        // edge
+        westWrapper.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        Dimension boxSize = new Dimension(800, 300);
+        Dimension boxSize = new Dimension(800, 40); // Increased height for bigger text
 
-        // 1. Input Boxes Panel (BoxLayout)
+        // 1. Input Boxes Panel
         JPanel inputPanel = new JPanel();
-        inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.Y_AXIS)); // Vertical stacking
+        inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.Y_AXIS));
 
         // Bus Name Input
         JLabel name = new JLabel("Name:");
-        JTextField nameBox = new JTextField(15); // Suggested column width
+        name.setFont(labelFont);
+        JTextField nameBox = new JTextField(15);
+        nameBox.setFont(inputFont);
         nameBox.setMaximumSize(boxSize);
         inputPanel.add(name);
         inputPanel.add(nameBox);
+        inputPanel.add(Box.createVerticalStrut(10)); // Adds spacing between fields
 
-        // Example of a second input
+        // Model Input
         JLabel model = new JLabel("Model:");
+        model.setFont(labelFont);
         JTextField modelBox = new JTextField(15);
+        modelBox.setFont(inputFont);
         modelBox.setMaximumSize(boxSize);
         inputPanel.add(model);
         inputPanel.add(modelBox);
+        inputPanel.add(Box.createVerticalStrut(10));
 
+        // Type Input
         JLabel type = new JLabel("Type:");
+        type.setFont(labelFont);
         JTextField typeBox = new JTextField(15);
+        typeBox.setFont(inputFont);
         typeBox.setMaximumSize(boxSize);
         inputPanel.add(type);
         inputPanel.add(typeBox);
+        inputPanel.add(Box.createVerticalStrut(10));
 
+        // Cruise Speed Input
         JLabel cruiseSpeed = new JLabel("Cruise Speed:");
+        cruiseSpeed.setFont(labelFont);
         JTextField cruiseSpeedBox = new JTextField(15);
+        cruiseSpeedBox.setFont(inputFont);
         cruiseSpeedBox.setMaximumSize(boxSize);
         inputPanel.add(cruiseSpeed);
         inputPanel.add(cruiseSpeedBox);
+        inputPanel.add(Box.createVerticalStrut(10));
 
+        // Fuel Burn Rate Input
         JLabel fuelBurnRate = new JLabel("Fuel Burn Rate:");
+        fuelBurnRate.setFont(labelFont);
         JTextField fuelBurnRateBox = new JTextField(15);
+        fuelBurnRateBox.setFont(inputFont);
         fuelBurnRateBox.setMaximumSize(boxSize);
         inputPanel.add(fuelBurnRate);
         inputPanel.add(fuelBurnRateBox);
+        inputPanel.add(Box.createVerticalStrut(10));
 
+        // Fuel Capacity Input
         JLabel fuelCapacity = new JLabel("Fuel Capacity:");
+        fuelCapacity.setFont(labelFont);
         JTextField fuelCapacityBox = new JTextField(15);
+        fuelCapacityBox.setFont(inputFont);
         fuelCapacityBox.setMaximumSize(boxSize);
         inputPanel.add(fuelCapacity);
         inputPanel.add(fuelCapacityBox);
 
         inputPanel.add(Box.createVerticalGlue());
 
-        // 2. Button Panel (FlowLayout)
+        // 2. Button Panel
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new FlowLayout()); // Default is side-by-side
+        buttonPanel.setLayout(new FlowLayout());
 
         JButton addBtn = new JButton("Submit");
         JButton removeBtn = new JButton("Remove");
+
+        // Make buttons bigger too
+        addBtn.setFont(labelFont);
+        removeBtn.setFont(labelFont);
+
         buttonPanel.add(addBtn);
         buttonPanel.add(removeBtn);
 
-        // 3. Add the input and button panels to the wrapper
+        // 3. Add to wrapper
         westWrapper.add(inputPanel);
         westWrapper.add(buttonPanel);
 
-        // Add the single wrapper panel to the West of the main layout
+        // Add the single wrapper panel to the West
         buspanel.add(westWrapper, BorderLayout.WEST);
 
         return buspanel;

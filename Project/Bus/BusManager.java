@@ -27,9 +27,6 @@ public class BusManager {
                 System.out.println(line);
                 line = line.replace("\"", "");
                 String[] columns = line.split(", ");
-                for (String c : columns) {
-                    System.out.println(c);
-                }
                 make = columns[0];
                 model = columns[1];
                 type = columns[2];
@@ -47,7 +44,7 @@ public class BusManager {
         }
     }
 
-    public ArrayList returnBus() {
+    public ArrayList<BusClass> returnBus() {
         return busList;
     }
 }
