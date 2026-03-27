@@ -5,6 +5,8 @@ import Project.Bus.BusClass;
 
 import javax.management.openmbean.ArrayType;
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.JTextComponent;
 
@@ -207,6 +209,8 @@ public class UserInterface {
             busTable.addRow(new Object[] { col[0], col[1], col[2], col[3], col[4], col[5] });
         }
 
+
+
         // Change from EAST to CENTER so the table expands to fill the remaining space
         buspanel.add(pane, BorderLayout.CENTER);
 
@@ -304,6 +308,16 @@ public class UserInterface {
 
         // Add the single wrapper panel to the West
         buspanel.add(westWrapper, BorderLayout.WEST);
+
+        // change the text boxes besed on the table
+        table.getSelectionModel().addListSelectionListener(e -> {
+
+            if (!e.getValueIsAdjusting()) {
+                bManager.busList[table.getSelectedRow()]
+                
+            }
+
+        });
 
         return buspanel;
     }
