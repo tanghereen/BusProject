@@ -209,8 +209,6 @@ public class UserInterface {
             busTable.addRow(new Object[] { col[0], col[1], col[2], col[3], col[4], col[5] });
         }
 
-
-
         // Change from EAST to CENTER so the table expands to fill the remaining space
         buspanel.add(pane, BorderLayout.CENTER);
 
@@ -313,8 +311,8 @@ public class UserInterface {
         table.getSelectionModel().addListSelectionListener(e -> {
 
             if (!e.getValueIsAdjusting()) {
-                bManager.busList[table.getSelectedRow()]
-                
+                // bManager.busList[table.getSelectedRow()]
+
             }
 
         });
