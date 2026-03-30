@@ -1,16 +1,8 @@
 package Project;
 
-import Project.Bus.BusManager;
-import Project.Bus.BusClass;
+import java.awt.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.text.JTextComponent;
-
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.geom.*;
-import java.util.ArrayList;
-import java.util.List;
 
 //https://docs.oracle.com/javase/tutorial/uiswing/layout/visual.html
 // After the login it should initialize the Weighted Graph
