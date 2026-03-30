@@ -7,8 +7,8 @@ import Project.BusStation.BusStationManager;
 
 import java.awt.*;
 import java.io.BufferedWriter;
-import java.io.BufferedReader; 
-import java.io.FileReader; 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -27,7 +27,7 @@ public class UserInterface {
     private CardLayout cardLayout;
     private DefaultTableModel busTable;
     private JPanel loginPanel;
-    private JPanel dashboardPanel;
+    private JPanel routePanel;
     private JPanel buspanel;
     private JPanel stationpanel;
     private BusManager bManager;
@@ -160,51 +160,42 @@ public class UserInterface {
         return loginPanel;
     }
 
-    private boolean validateLogin(String username, String password) {
-        File file = new File("Accounts.csv"); 
+    // private boolean validateLogin(String username, String password) {
+    // File file = new File("Accounts.csv");
 
-        if (!file.exists()) {
-            return false; 
-        }
+    // if (!file.exists()) {
+    // return false;
+    // }
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line; 
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(","); // split username and password with a comma
+    // try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+    // String line;
+    // while ((line = reader.readLine()) != null) {
+    // String[] parts = line.split(","); // split username and password with a comma
 
-                if (parts.length >= 2) {
-                    String storedUser = parts.trim(); 
-                    String storedPass = parts.trim();
-                    
-                    if (storedUser.equals(username) && storedPass.equals(password)) {
-                        return true; 
-                    }
-                }
+    // if (parts.length >= 2) {
+    // String storedUser = parts.trim();
+    // String storedPass = parts.trim();
 
-            }
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(frame, "Could not read Accounts.csv file");
-            e.printStackTrace();
-        }
-        return false; 
-    }
+    // if (storedUser.equals(username) && storedPass.equals(password)) {
+    // return true;
+    // }
+    // }
+
+    // }
+    // } catch (IOException e) {
+    // JOptionPane.showMessageDialog(frame, "Could not read Accounts.csv file");
+    // e.printStackTrace();
+    // }
+    // return false;
+    // }
 
     // current account dialog
     private void showAddAccountDialog() {
-<<<<<<< HEAD
         JDialog dialog = new JDialog(frame, "Create New Account", true);
         dialog.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
-=======
-
-    JDialog dialog = new JDialog(frame, "Create New Account", true);
-    dialog.setLayout(new GridBagLayout());
-    GridBagConstraints gbc = new GridBagConstraints();
-    gbc.insets = new Insets(5, 5, 5, 5);
-    gbc.fill = GridBagConstraints.HORIZONTAL;
->>>>>>> 6d35547c3ae4894c1659064a518e9953586272ba
 
         JTextField newUsernameField = new JTextField(15);
         JPasswordField newPasswordField = new JPasswordField(15);
@@ -267,18 +258,9 @@ public class UserInterface {
     }
 
     private JPanel dashboardPanel() {
-        dashboardPanel = new JPanel(new BorderLayout());
-        String[] dropdownOptions = { "Choose Option", "Manage Bus" };
-        JComboBox<String> comboBox = new JComboBox<>(dropdownOptions);
-        comboBox.addActionListener(e -> {
-            String selected = (String) comboBox.getSelectedItem();
-            if (!selected.startsWith("Choose")) {
-                cardLayout.show(cardPanel, "MANAGEBUS");
-            }
-        });
-        dashboardPanel.add(comboBox, BorderLayout.NORTH);
+        routePanel = new JPanel(new BorderLayout());
 
-        return dashboardPanel;
+        return routePanel;
     }
 
     // Add / Edit / remove Bus page
@@ -442,14 +424,32 @@ public class UserInterface {
             StringBuilder errorLog = new StringBuilder();
             boolean isValid = true;
 
-            // --- 1. STRICT STRING VALIDATION (No symbols allowed) ---
+            // --- 1. Get and Trim Inputs ---
             String makeVal = makeBox.getText().trim();
             String modelVal = modelBox.getText().trim();
             String typeVal = typeBox.getText().trim();
+            String speedTxt = cruiseSpeedBox.getText().trim();
+            String burnTxt = fuelBurnRateBox.getText().trim();
+            String capTxt = fuelCapacityBox.getText().trim();
 
-            // Regex: Only letters, numbers, and spaces. No !@#$%^&*() or 'f' suffixes here.
+            // --- 2. CASE-INSENSITIVE DUPLICATE CHECK (Make + Model) ---
+            for (int i = 0; i < bManager.busList.size(); i++) {
+                if (i == selectedRow)
+                    continue; // Skip the bus we are currently editing
+
+                BusClass existingBus = (BusClass) bManager.busList.get(i);
+                // Check if BOTH make and model match (ignoring case)
+                if (existingBus.getMake().equalsIgnoreCase(makeVal) &&
+                        existingBus.getModel().equalsIgnoreCase(modelVal)) {
+                    errorLog.append("- A bus with the make '").append(makeVal)
+                            .append("' and model '").append(modelVal).append("' already exists.\n");
+                    isValid = false;
+                    break;
+                }
+            }
+
+            // --- 3. STRING VALIDATION (No symbols) ---
             String alphaNumRegex = "^[a-zA-Z0-9 ]+$";
-
             if (!makeVal.matches(alphaNumRegex)) {
                 errorLog.append("- 'Make' has invalid symbols or is empty.\n");
                 isValid = false;
@@ -463,34 +463,27 @@ public class UserInterface {
                 isValid = false;
             }
 
-            // --- 2. STRICT DOUBLE VALIDATION (Digits and decimal ONLY) ---
-            // This Regex ensures NO letters (like 'f') can get through.
-            // ^[0-9]*\\.?[0-9]+$ means: optional digits, optional dot, required digits.
+            // --- 4. DOUBLE VALIDATION (Numeric only) ---
             String numericRegex = "^[0-9]*\\.?[0-9]+$";
-
-            String speedTxt = cruiseSpeedBox.getText().trim();
-            String burnTxt = fuelBurnRateBox.getText().trim();
-            String capTxt = fuelCapacityBox.getText().trim();
-
             if (!speedTxt.matches(numericRegex)) {
-                errorLog.append("- 'Cruise Speed' must be a pure number (no letters/symbols).\n");
+                errorLog.append("- 'Cruise Speed' must be a pure number.\n");
                 isValid = false;
             }
             if (!burnTxt.matches(numericRegex)) {
-                errorLog.append("- 'Fuel Burn Rate' must be a pure number (no letters/symbols).\n");
+                errorLog.append("- 'Fuel Burn Rate' must be a pure number.\n");
                 isValid = false;
             }
             if (!capTxt.matches(numericRegex)) {
-                errorLog.append("- 'Fuel Capacity' must be a pure number (no letters/symbols).\n");
+                errorLog.append("- 'Fuel Capacity' must be a pure number.\n");
                 isValid = false;
             }
 
-            // --- 3. FINAL EXECUTION ---
+            // --- 5. FINAL EXECUTION ---
             if (!isValid) {
                 JOptionPane.showMessageDialog(frame, errorLog.toString(), "Input Errors", JOptionPane.ERROR_MESSAGE);
             } else {
-                // Now that we KNOW they are pure numbers, parsing is safe
-                BusClass currentBus = bManager.busList.get(selectedRow);
+                // Update the Data Object
+                BusClass currentBus = (BusClass) bManager.busList.get(selectedRow);
                 currentBus.setMake(makeVal);
                 currentBus.setModel(modelVal);
                 currentBus.setType(typeVal);
@@ -498,18 +491,19 @@ public class UserInterface {
                 currentBus.setFuelBurnRate(Double.parseDouble(burnTxt));
                 currentBus.setFuelCapacity(Double.parseDouble(capTxt));
 
-                // Update Table
+                // Update the UI Table
                 busTable.setValueAt(makeVal, selectedRow, 0);
                 busTable.setValueAt(modelVal, selectedRow, 1);
                 busTable.setValueAt(typeVal, selectedRow, 2);
-                busTable.setValueAt(speedTxt, selectedRow, 3);
+                busTable.setValueAt(capTxt, selectedRow, 3); // Based on your tablename array order
                 busTable.setValueAt(burnTxt, selectedRow, 4);
-                busTable.setValueAt(capTxt, selectedRow, 5);
+                busTable.setValueAt(speedTxt, selectedRow, 5);
 
                 try {
                     bManager.save();
                     JOptionPane.showMessageDialog(frame, "Changes Saved!");
                 } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(frame, "Error saving: " + ex.getMessage());
                     ex.printStackTrace();
                 }
             }
@@ -518,23 +512,63 @@ public class UserInterface {
         removeBus.addActionListener(e -> {
             if (bManager.removeBus(selectedRow)) {
                 busTable.removeRow(selectedRow);
+                selectedRow = -1;
             }
         });
 
-        // New Bus
         newBus.addActionListener(e -> {
+            String baseMake = "Make";
+
+            String finalMake = baseMake;
+            int counter = 1;
+
+            // --- CASE-INSENSITIVE UNIQUE NAME GENERATOR ---
+            boolean duplicateFound = true;
+            while (duplicateFound) {
+                duplicateFound = false;
+                for (Object b : bManager.busList) {
+                    BusClass existingBus = (BusClass) b;
+                    if (existingBus.getMake().equalsIgnoreCase(finalMake)) {
+                        duplicateFound = true;
+                        finalMake = baseMake + " (" + counter + ")";
+                        counter++;
+                        break; // Re-check the list with the new name
+                    }
+                }
+            }
+
+            // Create the new bus with the unique placeholder names
+            // Note: If your BusClass constructor doesn't take parameters,
+            // you can use setters instead.
             BusClass nb = new BusClass();
+            nb.setMake(finalMake);
+            nb.setType("Standard");
+            nb.setCruiseSpeed(0.0);
+            nb.setFuelBurnRate(0.0);
+            nb.setFuelCapacity(0.0);
+
+            // Add to manager and table
             bManager.busList.add(nb);
-            String s = ((BusClass) nb).displayBusInfo();
-            String[] col = s.split(", ");
-            busTable.addRow(new Object[] { col[0], col[1], col[2], col[3], col[4], col[5] });
+            busTable.addRow(new Object[] {
+                    nb.getMake(),
+                    nb.getModel(),
+                    nb.getType(),
+                    nb.getFuelCapacity(),
+                    nb.getFuelBurnRate(),
+                    nb.getCruiseSpeed()
+            });
+
+            // Automatically select the newly created row
             selectedRow = busTable.getRowCount() - 1;
-            makeBox.setText(bManager.busList.get(selectedRow).getMake());
-            modelBox.setText(bManager.busList.get(selectedRow).getModel());
-            typeBox.setText(bManager.busList.get(selectedRow).getType());
-            cruiseSpeedBox.setText(String.valueOf(bManager.busList.get(selectedRow).getCruiseSpeed()));
-            fuelBurnRateBox.setText(String.valueOf(bManager.busList.get(selectedRow).getFuelBurnRate()));
-            fuelCapacityBox.setText(String.valueOf(bManager.busList.get(selectedRow).getFuelCapacity()));
+            table.setRowSelectionInterval(selectedRow, selectedRow);
+
+            // Update the input boxes so the user can start editing immediately
+            makeBox.setText(nb.getMake());
+            modelBox.setText(nb.getModel());
+            typeBox.setText(nb.getType());
+            cruiseSpeedBox.setText(String.valueOf(nb.getCruiseSpeed()));
+            fuelBurnRateBox.setText(String.valueOf(nb.getFuelBurnRate()));
+            fuelCapacityBox.setText(String.valueOf(nb.getFuelCapacity()));
         });
 
         return buspanel;
@@ -735,7 +769,7 @@ public class UserInterface {
                 for (BusStationClass s : sManager.stationList) {
                     if (s.getName().equalsIgnoreCase(finalName)) {
                         nameExists = true;
-                        finalName = baseName + " " + counter;
+                        finalName = baseName + " (" + counter + ")";
                         counter++;
                         break;
                     }
