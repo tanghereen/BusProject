@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "UserInterface",
+            "request": "launch",
+            "mainClass": "Project.UserInterface",
+            "projectName": "BusProject_63b10fca"
+        },
+        {
+            "type": "java",
             "name": "BusManager",
             "request": "launch",
             "mainClass": "Project.Bus.BusManager",
