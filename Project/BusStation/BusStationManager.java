@@ -23,7 +23,7 @@ public class BusStationManager {
     public BusStationManager() throws FileNotFoundException {
     }
 
-    public void listBuses() {
+    public void listStations() {
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));
             while ((line = br.readLine()) != null) {
@@ -32,7 +32,7 @@ public class BusStationManager {
                 name = columns[0];
                 lat = Double.parseDouble(columns[1]);
                 lon = Double.parseDouble(columns[2]);
-                BusStationClass station = new BusStationClass();
+                BusStationClass station = new BusStationClass(name, lat, lon);
                 stationList.add(station);
 
             }

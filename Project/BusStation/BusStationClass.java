@@ -2,9 +2,9 @@ package Project.BusStation;
 
 public class BusStationClass {
     int Key = 0;
-    String name;
-    double latitude;
-    double longitude;
+    String name = "Name";
+    double latitude = 0;
+    double longitude = 0;
 
     public BusStationClass() {
 

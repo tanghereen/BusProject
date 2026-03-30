@@ -36,10 +36,12 @@ public class UserInterface {
     public UserInterface() {
         try {
             bManager = new BusManager();
+            bManager.listBuses();
+            sManager = new BusStationManager();
+            sManager.listStations();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        bManager.listBuses();
     }
 
     public static void main(String[] args) {
@@ -74,11 +76,21 @@ public class UserInterface {
         JMenuBar menuBar = new JMenuBar();
         JMenu menu = new JMenu("Actions");
         JMenuItem manageBus = new JMenuItem("Manage Bus");
+        JMenuItem manageStation = new JMenuItem("Manage Station");
         JMenuItem logoutItem = new JMenuItem("Logout");
 
         manageBus.addActionListener(e -> {
             cardLayout.show(cardPanel, "MANAGEBUS"); // Route back to login
             frame.revalidate(); // Re-layout the frame with the new menu
+            selectedRow = -1;
+
+        });
+
+        manageStation.addActionListener(e -> {
+            cardLayout.show(cardPanel, "MANAGESTATION");
+            frame.revalidate();
+            selectedRow = -1;
+
         });
 
         logoutItem.addActionListener(e -> {
@@ -88,6 +100,7 @@ public class UserInterface {
         });
 
         menu.add(manageBus);
+        menu.add(manageStation);
         menu.add(logoutItem);
         menuBar.add(menu);
         return menuBar;
@@ -146,64 +159,71 @@ public class UserInterface {
 
     // current account dialog
     private void showAddAccountDialog() {
-    JDialog dialog = new JDialog(frame, "Create New Account", true);
-    dialog.setLayout(new GridBagLayout());
-    GridBagConstraints gbc = new GridBagConstraints();
-    gbc.insets = new Insets(5, 5, 5, 5);
-    gbc.fill = GridBagConstraints.HORIZONTAL;
+        JDialog dialog = new JDialog(frame, "Create New Account", true);
+        dialog.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-    JTextField newUsernameField = new JTextField(15);
-    JPasswordField newPasswordField = new JPasswordField(15);
-    JPasswordField verifyPasswordField = new JPasswordField(15);
-    JButton submitBtn = new JButton("Submit");
+        JTextField newUsernameField = new JTextField(15);
+        JPasswordField newPasswordField = new JPasswordField(15);
+        JPasswordField verifyPasswordField = new JPasswordField(15);
+        JButton submitBtn = new JButton("Submit");
 
-    gbc.gridx = 0; gbc.gridy = 0;
-    dialog.add(new JLabel("New Username:"), gbc); 
-    gbc.gridx = 1;
-    dialog.add(newUsernameField, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        dialog.add(new JLabel("New Username:"), gbc);
+        gbc.gridx = 1;
+        dialog.add(newUsernameField, gbc);
 
-    gbc.gridx = 0; gbc.gridy = 1;
-    dialog.add(new JLabel("New Password:"), gbc);
-    gbc.gridx = 1;
-    dialog.add(newPasswordField, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        dialog.add(new JLabel("New Password:"), gbc);
+        gbc.gridx = 1;
+        dialog.add(newPasswordField, gbc);
 
-    gbc.gridx = 0; gbc.gridy = 2;
-    dialog.add(new JLabel("Verify Password:"), gbc);
-    gbc.gridx = 1;
-    dialog.add(verifyPasswordField, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        dialog.add(new JLabel("Verify Password:"), gbc);
+        gbc.gridx = 1;
+        dialog.add(verifyPasswordField, gbc);
 
-    gbc.gridx = 0; gbc.gridy = 3;
-    gbc.gridwidth = 2;
-    submitBtn.addActionListener(e -> {
-        String username = newUsernameField.getText();
-        String password = new String(newPasswordField.getPassword());
-        String verify = new String(verifyPasswordField.getPassword());
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 2;
+        submitBtn.addActionListener(e -> {
+            String username = newUsernameField.getText();
+            String password = new String(newPasswordField.getPassword());
+            String verify = new String(verifyPasswordField.getPassword());
 
-        if (username.isEmpty() || password.isEmpty()) { 
-            JOptionPane.showMessageDialog(dialog, "Fields cannot be empty! Please try again.", "Error", JOptionPane.ERROR_MESSAGE); 
-        } else if (!password.equals(verify)) { 
-            JOptionPane.showMessageDialog(dialog, "Passwords do not match! Please try again.", "Error", JOptionPane.ERROR_MESSAGE); 
-        } else { 
-            // stores account info into csv file 'Accounts.csv'
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter("Accounts.csv", true))) {
+            if (username.isEmpty() || password.isEmpty()) {
+                JOptionPane.showMessageDialog(dialog, "Fields cannot be empty! Please try again.", "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            } else if (!password.equals(verify)) {
+                JOptionPane.showMessageDialog(dialog, "Passwords do not match! Please try again.", "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            } else {
+                // stores account info into csv file 'Accounts.csv'
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter("Accounts.csv", true))) {
 
-                writer.write(username + ", " + password);
-                writer.newLine();
-                
-                JOptionPane.showMessageDialog(dialog, "The account '" + username + "' was stored successfully!");
-                dialog.dispose();
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(dialog, "Error writing to file: " + ex.getMessage(), "File Error", JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace();
+                    writer.write(username + ", " + password);
+                    writer.newLine();
+
+                    JOptionPane.showMessageDialog(dialog, "The account '" + username + "' was stored successfully!");
+                    dialog.dispose();
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(dialog, "Error writing to file: " + ex.getMessage(), "File Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    ex.printStackTrace();
+                }
             }
-        }
-    });
+        });
 
-    dialog.add(submitBtn, gbc);
-    dialog.pack();
-    dialog.setLocationRelativeTo(frame);
-    dialog.setVisible(true);
-}
+        dialog.add(submitBtn, gbc);
+        dialog.pack();
+        dialog.setLocationRelativeTo(frame);
+        dialog.setVisible(true);
+    }
 
     private JPanel dashboardPanel() {
         dashboardPanel = new JPanel(new BorderLayout());
@@ -483,28 +503,24 @@ public class UserInterface {
     private JPanel manageBusStation() {
         JPanel stationpanel = new JPanel(new BorderLayout());
 
-        // --- Define Larger Fonts ---
         Font labelFont = new Font("SansSerif", Font.BOLD, 18);
         Font inputFont = new Font("SansSerif", Font.PLAIN, 18);
         Font tableFont = new Font("SansSerif", Font.PLAIN, 16);
 
-        // --- Station Table Definition ---
         String tablename[] = { "Name", "Latitude", "Longitude" };
-        // FIX: Use the class-level variable if you have one, or ensure this one is used
-        // consistently
-        DefaultTableModel stationTable = new DefaultTableModel(tablename, 0);
+
+        // FIX 1: Remove "DefaultTableModel" prefix to use the class-level variable
+        stationTable = new DefaultTableModel(tablename, 0);
         JTable table = new JTable(stationTable);
 
         table.setFont(tableFont);
         table.setRowHeight(30);
         table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 16));
-
         JScrollPane pane = new JScrollPane(table);
 
-        // Load existing stations into the table
+        // Populate table from sManager
         for (Object st : sManager.stationList) {
             BusStationClass station = (BusStationClass) st;
-            // Adjusting to 3 columns: Name, Lat, Long
             stationTable.addRow(new Object[] {
                     station.getName(),
                     station.getLatitude(),
@@ -514,13 +530,12 @@ public class UserInterface {
 
         stationpanel.add(pane, BorderLayout.CENTER);
 
-        // --- UI WRAPPER ---
         JPanel stationWrapper = new JPanel();
         stationWrapper.setLayout(new BoxLayout(stationWrapper, BoxLayout.Y_AXIS));
         stationWrapper.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         Dimension boxSize = new Dimension(800, 40);
 
-        // Input Fields
+        // UI Fields
         JLabel sName = new JLabel("Station Name:");
         sName.setFont(labelFont);
         JTextField sNameBox = new JTextField(15);
@@ -550,7 +565,6 @@ public class UserInterface {
         inputPanel.add(longitude);
         inputPanel.add(longitudeBox);
 
-        // Buttons
         JButton submitStation = new JButton("Submit");
         JButton removeStation = new JButton("Remove");
         JButton newStation = new JButton("New Station");
@@ -567,11 +581,12 @@ public class UserInterface {
         stationWrapper.add(buttonPanel);
         stationpanel.add(stationWrapper, BorderLayout.WEST);
 
-        // --- SELECTION LOGIC ---
+        // FIX 2: Correct the Selection Listener to use Station variables
         table.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 selectedRow = table.getSelectedRow();
                 if (selectedRow != -1) {
+                    // Get from sManager, NOT bManager
                     BusStationClass s = sManager.stationList.get(selectedRow);
                     sNameBox.setText(s.getName());
                     latitudeBox.setText(String.valueOf(s.getLatitude()));
@@ -584,8 +599,8 @@ public class UserInterface {
             }
         });
 
-        // --- SUBMIT / VALIDATION LOGIC ---
         submitStation.addActionListener(e -> {
+            // 1. Check if a row is actually selected
             if (selectedRow == -1) {
                 JOptionPane.showMessageDialog(frame, "Please select a station first.");
                 return;
@@ -594,49 +609,69 @@ public class UserInterface {
             StringBuilder errorLog = new StringBuilder();
             boolean isValid = true;
 
+            // 2. Get and trim input values
             String nameVal = sNameBox.getText().trim();
             String latTxt = latitudeBox.getText().trim();
             String lonTxt = longitudeBox.getText().trim();
 
-            // Name Validation
-            if (!nameVal.matches("^[a-zA-Z0-9 ]+$")) {
-                errorLog.append("- Name must be alphanumeric.\n");
+            // 3. CASE-INSENSITIVE DUPLICATE CHECK
+            // We loop through the manager's list and compare names, skipping the selected
+            // row
+            for (int i = 0; i < sManager.stationList.size(); i++) {
+                if (i == selectedRow)
+                    continue; // Don't compare the station to itself
+
+                BusStationClass existingStation = sManager.stationList.get(i);
+                if (existingStation.getName().equalsIgnoreCase(nameVal)) {
+                    errorLog.append("- A station with the name '").append(nameVal).append("' already exists.\n");
+                    isValid = false;
+                    break; // Found a duplicate, no need to keep looking
+                }
+            }
+
+            // 4. REGEX FORMAT VALIDATION
+            if (!nameVal.matches("^[a-zA-Z0-9 ]+$") && nameVal.length() < 25) {
+                errorLog.append("- Name must be alphanumeric and less than 25 characters.\n");
                 isValid = false;
             }
 
-            // Lat/Long Validation (Allows negative numbers and decimals)
             String coordRegex = "^-?[0-9]*\\.?[0-9]+$";
-            if (!latTxt.matches(coordRegex)) {
-                errorLog.append("- Latitude must be a valid coordinate.\n");
+            if (!latTxt.matches(coordRegex) && latTxt.length() < 15) {
+                errorLog.append("- Latitude must be a valid number.\n");
                 isValid = false;
             }
-            if (!lonTxt.matches(coordRegex)) {
-                errorLog.append("- Longitude must be a valid coordinate.\n");
+            if (!lonTxt.matches(coordRegex) && lonTxt.length() < 15) {
+                errorLog.append("- Longitude must be a valid number.\n");
                 isValid = false;
             }
 
+            // 5. FINAL SUCCESS OR FAILURE LOGIC
             if (!isValid) {
                 JOptionPane.showMessageDialog(frame, errorLog.toString(), "Input Errors", JOptionPane.ERROR_MESSAGE);
             } else {
+                // Update the Station Object in the List
                 BusStationClass currentStation = sManager.stationList.get(selectedRow);
                 currentStation.setName(nameVal);
                 currentStation.setLatitude(Double.parseDouble(latTxt));
                 currentStation.setLongitude(Double.parseDouble(lonTxt));
 
+                // Update the UI Table
                 stationTable.setValueAt(nameVal, selectedRow, 0);
                 stationTable.setValueAt(latTxt, selectedRow, 1);
                 stationTable.setValueAt(lonTxt, selectedRow, 2);
 
+                // Save to File/Persistence
                 try {
-                    sManager.save(); // Assuming sManager has a save method
-                    JOptionPane.showMessageDialog(frame, "Station Updated!");
+                    sManager.save();
+                    JOptionPane.showMessageDialog(frame, "Station Updated Successfully!");
                 } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(frame, "Error saving data: " + ex.getMessage(), "File Error",
+                            JOptionPane.ERROR_MESSAGE);
                     ex.printStackTrace();
                 }
             }
         });
 
-        // --- REMOVE LOGIC ---
         removeStation.addActionListener(e -> {
             if (selectedRow != -1) {
                 if (sManager.removeStation(selectedRow)) {
@@ -646,11 +681,29 @@ public class UserInterface {
             }
         });
 
-        // --- NEW STATION LOGIC ---
         newStation.addActionListener(e -> {
-            BusStationClass ns = new BusStationClass("New Station", 0.0, 0.0);
+            String baseName = "New Station";
+            String finalName = baseName;
+            int counter = 1;
+
+            // Loop until we find a name that doesn't exist (New Station, New Station 1,
+            // etc.)
+            boolean nameExists = true;
+            while (nameExists) {
+                nameExists = false;
+                for (BusStationClass s : sManager.stationList) {
+                    if (s.getName().equalsIgnoreCase(finalName)) {
+                        nameExists = true;
+                        finalName = baseName + " " + counter;
+                        counter++;
+                        break;
+                    }
+                }
+            }
+
+            BusStationClass ns = new BusStationClass(finalName, 0.0, 0.0);
             sManager.stationList.add(ns);
-            stationTable.addRow(new Object[] { "New Station", "0.0", "0.0" });
+            stationTable.addRow(new Object[] { finalName, "0.0", "0.0" });
             table.setRowSelectionInterval(stationTable.getRowCount() - 1, stationTable.getRowCount() - 1);
         });
 
