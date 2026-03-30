@@ -1,22 +1,12 @@
 package Project;
 
-import Project.Bus.BusManager;
 import Project.Bus.BusClass;
-
-import javax.management.openmbean.ArrayType;
-import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.text.JTextComponent;
-
+import Project.Bus.BusManager;
 import java.awt.*;
-import java.awt.event.*;
-import java.awt.geom.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 
 //https://docs.oracle.com/javase/tutorial/uiswing/layout/visual.html
 // After the login it should initialize the Weighted Graph
@@ -142,6 +132,7 @@ public class UserInterface {
         return loginPanel;
     }
 
+    // current account dialog
     private void showAddAccountDialog() {
 
         JDialog dialog = new JDialog(frame, "Create New Account", true);
