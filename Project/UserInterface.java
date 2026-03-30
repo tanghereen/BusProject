@@ -1,8 +1,22 @@
 package Project;
 
-import java.awt.*;
+import Project.Bus.BusManager;
+import Project.Bus.BusClass;
+
+import javax.management.openmbean.ArrayType;
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.text.JTextComponent;
+
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.geom.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 //https://docs.oracle.com/javase/tutorial/uiswing/layout/visual.html
 // After the login it should initialize the Weighted Graph
@@ -15,6 +29,17 @@ public class UserInterface {
     private JPanel loginPanel;
     private JPanel dashboardPanel;
     private JPanel buspanel;
+    private BusManager bManager;
+    int selectedRow = -1;
+
+    public UserInterface() {
+        try {
+            bManager = new BusManager();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        bManager.listBuses();
+    }
 
     public static void main(String[] args) {
         JOptionPane.showMessageDialog(null,
@@ -29,7 +54,7 @@ public class UserInterface {
         // Set size for UI window
         frame = new JFrame("Route Planner");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(800, 600);
+        frame.setSize(1300, 1000);
         frame.setLocationRelativeTo(null);
 
         cardLayout = new CardLayout();
@@ -163,83 +188,201 @@ public class UserInterface {
     }
 
     // Add / Edit / remove Bus page
+    // Add / Edit / remove Bus page
     private JPanel manageBus() {
-        buspanel = new JPanel(new BorderLayout());
+        JPanel buspanel = new JPanel(new BorderLayout());
 
-        // Current Buses Table
-        String tablename[] = { "Current Busses" };
-        busTable = new DefaultTableModel(tablename, 0);
+        // --- Define Larger Fonts ---
+        Font labelFont = new Font("SansSerif", Font.BOLD, 18);
+        Font inputFont = new Font("SansSerif", Font.PLAIN, 18);
+        Font tableFont = new Font("SansSerif", Font.PLAIN, 16);
+
+        // --- Current Buses Table ---
+        String tablename[] = { "Make", "Model", "Type", "Fuel Capacity", "Fuel Burn Rate", "Cruise Speed" };
+        DefaultTableModel busTable = new DefaultTableModel(tablename, 0);
         JTable table = new JTable(busTable);
+
+        // Make the table text and rows bigger
+        table.setFont(tableFont);
+        table.setRowHeight(30);
+        table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 16));
+
         JScrollPane pane = new JScrollPane(table);
 
-        buspanel.add(pane, BorderLayout.EAST);
+        for (Object b : bManager.busList) {
+            String s = ((BusClass) b).displayBusInfo();
+            String[] col = s.split(", ");
+            busTable.addRow(new Object[] { col[0], col[1], col[2], col[3], col[4], col[5] });
+        }
+
+        // Change from EAST to CENTER so the table expands to fill the remaining space
+        buspanel.add(pane, BorderLayout.CENTER);
 
         // --- NEW WRAPPER PANEL FOR THE WEST SIDE ---
-        // We use a vertical BoxLayout so the inputs sit above the buttons
         JPanel westWrapper = new JPanel();
         westWrapper.setLayout(new BoxLayout(westWrapper, BoxLayout.Y_AXIS));
+        // Add a little padding around the left panel so it isn't squeezed against the
+        // edge
+        westWrapper.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        Dimension boxSize = new Dimension(500, 150);
+        Dimension boxSize = new Dimension(800, 40); // Increased height for bigger text
 
-        // 1. Input Boxes Panel (BoxLayout)
+        // 1. Input Boxes Panel
         JPanel inputPanel = new JPanel();
-        inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.Y_AXIS)); // Vertical stacking
+        inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.Y_AXIS));
 
         // Bus Name Input
-        JLabel name = new JLabel("Name:");
-        JTextField nameBox = new JTextField(15); // Suggested column width
-        nameBox.setMaximumSize(boxSize);
-        inputPanel.add(name);
-        inputPanel.add(nameBox);
+        JLabel make = new JLabel("Make:");
+        make.setFont(labelFont);
+        JTextField makeBox = new JTextField(15);
+        makeBox.setFont(inputFont);
+        makeBox.setMaximumSize(boxSize);
+        inputPanel.add(make);
+        inputPanel.add(makeBox);
+        inputPanel.add(Box.createVerticalStrut(10)); // Adds spacing between fields
 
-        // Example of a second input
+        // Model Input
         JLabel model = new JLabel("Model:");
+        model.setFont(labelFont);
         JTextField modelBox = new JTextField(15);
+        modelBox.setFont(inputFont);
         modelBox.setMaximumSize(boxSize);
         inputPanel.add(model);
         inputPanel.add(modelBox);
+        inputPanel.add(Box.createVerticalStrut(10));
 
+        // Type Input
         JLabel type = new JLabel("Type:");
+        type.setFont(labelFont);
         JTextField typeBox = new JTextField(15);
+        typeBox.setFont(inputFont);
         typeBox.setMaximumSize(boxSize);
         inputPanel.add(type);
         inputPanel.add(typeBox);
+        inputPanel.add(Box.createVerticalStrut(10));
 
+        // Cruise Speed Input
         JLabel cruiseSpeed = new JLabel("Cruise Speed:");
+        cruiseSpeed.setFont(labelFont);
         JTextField cruiseSpeedBox = new JTextField(15);
+        cruiseSpeedBox.setFont(inputFont);
         cruiseSpeedBox.setMaximumSize(boxSize);
         inputPanel.add(cruiseSpeed);
         inputPanel.add(cruiseSpeedBox);
+        inputPanel.add(Box.createVerticalStrut(10));
 
+        // Fuel Burn Rate Input
         JLabel fuelBurnRate = new JLabel("Fuel Burn Rate:");
+        fuelBurnRate.setFont(labelFont);
         JTextField fuelBurnRateBox = new JTextField(15);
+        fuelBurnRateBox.setFont(inputFont);
         fuelBurnRateBox.setMaximumSize(boxSize);
         inputPanel.add(fuelBurnRate);
         inputPanel.add(fuelBurnRateBox);
+        inputPanel.add(Box.createVerticalStrut(10));
 
+        // Fuel Capacity Input
         JLabel fuelCapacity = new JLabel("Fuel Capacity:");
+        fuelCapacity.setFont(labelFont);
         JTextField fuelCapacityBox = new JTextField(15);
+        fuelCapacityBox.setFont(inputFont);
         fuelCapacityBox.setMaximumSize(boxSize);
         inputPanel.add(fuelCapacity);
         inputPanel.add(fuelCapacityBox);
 
         inputPanel.add(Box.createVerticalGlue());
 
-        // 2. Button Panel (FlowLayout)
+        // 2. Button Panel
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new FlowLayout()); // Default is side-by-side
+        buttonPanel.setLayout(new FlowLayout());
 
-        JButton addBtn = new JButton("Submit");
-        JButton removeBtn = new JButton("Remove");
-        buttonPanel.add(addBtn);
-        buttonPanel.add(removeBtn);
+        JButton submitBus = new JButton("Submit");
+        JButton removeBus = new JButton("Remove");
+        JButton newBus = new JButton("New Bus");
 
-        // 3. Add the input and button panels to the wrapper
+        // Make buttons bigger too
+        submitBus.setFont(labelFont);
+        removeBus.setFont(labelFont);
+        newBus.setFont(labelFont);
+
+        buttonPanel.add(submitBus);
+        buttonPanel.add(newBus);
+        buttonPanel.add(removeBus);
+
+        // 3. Add to wrapper
         westWrapper.add(inputPanel);
         westWrapper.add(buttonPanel);
 
-        // Add the single wrapper panel to the West of the main layout
+        // Add the single wrapper panel to the West
         buspanel.add(westWrapper, BorderLayout.WEST);
+
+        // change the text boxes besed on the table
+
+        table.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                selectedRow = table.getSelectedRow();
+                if (selectedRow != -1) {
+                    makeBox.setText(bManager.busList.get(selectedRow).getMake());
+                    modelBox.setText(bManager.busList.get(selectedRow).getModel());
+                    typeBox.setText(bManager.busList.get(selectedRow).getType());
+                    cruiseSpeedBox.setText(String.valueOf(bManager.busList.get(selectedRow).getCruiseSpeed()));
+                    fuelBurnRateBox.setText(String.valueOf(bManager.busList.get(selectedRow).getFuelBurnRate()));
+                    fuelCapacityBox.setText(String.valueOf(bManager.busList.get(selectedRow).getFuelCapacity()));
+                } else {
+                    makeBox.setText("");
+                    modelBox.setText("");
+                    typeBox.setText("");
+                    cruiseSpeedBox.setText("");
+                    fuelBurnRateBox.setText("");
+                    fuelCapacityBox.setText("");
+                }
+            }
+
+        });
+        // Submit Button
+        submitBus.addActionListener(e -> {
+            if (selectedRow != -1) {
+                bManager.busList.get(selectedRow).setMake(makeBox.getText());
+                bManager.busList.get(selectedRow).setModel(modelBox.getText());
+                bManager.busList.get(selectedRow).setType(typeBox.getText());
+                bManager.busList.get(selectedRow).setCruiseSpeed(Double.valueOf(cruiseSpeedBox.getText()));
+                bManager.busList.get(selectedRow).setFuelBurnRate(Double.valueOf(fuelBurnRateBox.getText()));
+                bManager.busList.get(selectedRow).setFuelCapacity(Double.valueOf(fuelCapacityBox.getText()));
+                busTable.setValueAt(makeBox.getText(), selectedRow, 0);
+                busTable.setValueAt(modelBox.getText(), selectedRow, 1);
+                busTable.setValueAt(typeBox.getText(), selectedRow, 2);
+                busTable.setValueAt(cruiseSpeedBox.getText(), selectedRow, 3);
+                busTable.setValueAt(fuelBurnRateBox.getText(), selectedRow, 4);
+                busTable.setValueAt(fuelCapacityBox.getText(), selectedRow, 5);
+                try {
+                    bManager.save();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
+        // Remove Button
+        removeBus.addActionListener(e -> {
+            if (bManager.removeBus(selectedRow)) {
+                busTable.removeRow(selectedRow);
+            }
+        });
+
+        // New Bus
+        newBus.addActionListener(e -> {
+            BusClass nb = new BusClass();
+            bManager.busList.add(nb);
+            String s = ((BusClass) nb).displayBusInfo();
+            String[] col = s.split(", ");
+            busTable.addRow(new Object[] { col[0], col[1], col[2], col[3], col[4], col[5] });
+            selectedRow = busTable.getRowCount() - 1;
+            makeBox.setText(bManager.busList.get(selectedRow).getMake());
+            modelBox.setText(bManager.busList.get(selectedRow).getModel());
+            typeBox.setText(bManager.busList.get(selectedRow).getType());
+            cruiseSpeedBox.setText(String.valueOf(bManager.busList.get(selectedRow).getCruiseSpeed()));
+            fuelBurnRateBox.setText(String.valueOf(bManager.busList.get(selectedRow).getFuelBurnRate()));
+            fuelCapacityBox.setText(String.valueOf(bManager.busList.get(selectedRow).getFuelCapacity()));
+        });
 
         return buspanel;
     }
