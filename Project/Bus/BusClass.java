@@ -6,14 +6,16 @@ public class BusClass {
     String make = "make";
     String model = "model";
     String type = "type";
+    String fuelType = "fuelType";
     double fuelCapacity = 0.0;
     double cruiseSpeed = 0.0;
     double fuelBurnRate = 0.0;
 
-    BusClass(String make, String model, String type, double fuelCapacity, double fuelBurnRate, double cruiseSpeed) {
+    BusClass(String make, String model, String type, String fuelType, double fuelCapacity, double fuelBurnRate, double cruiseSpeed) {
         this.make = make;
         this.model = model;
         this.type = type;
+        this.fuelType = fuelType;
         this.fuelCapacity = fuelCapacity;
         this.fuelBurnRate = fuelBurnRate;
         this.cruiseSpeed = cruiseSpeed;
@@ -22,7 +24,7 @@ public class BusClass {
     public BusClass() {
     }
 
-    public String getMake() {
+    public String getMake() { // getter and setter for make
         return make;
     }
 
@@ -30,7 +32,7 @@ public class BusClass {
         this.make = make;
     }
 
-    public String getModel() {
+    public String getModel() { // getter and setter for model
         return model;
     }
 
@@ -38,15 +40,22 @@ public class BusClass {
         this.model = model;
     }
 
-    public String getType() {
+    public String getType() { // getter and setter for type
         return type;
     }
 
     public void setType(String type) {
         this.type = type;
     }
+     public String getFuelType() { // added getter and setter for fuelType
+        return fuelType;
+    }
 
-    public double getFuelCapacity() {
+    public void setFuelType(String fuelType) {
+        this.fuelType = fuelType;
+    }
+
+    public double getFuelCapacity() { // getter and setter for fuelCapacity
         return fuelCapacity;
     }
 
@@ -54,7 +63,7 @@ public class BusClass {
         this.fuelCapacity = fuelCapacity;
     }
 
-    public void setCruiseSpeed(double CruiseSpeed) {
+    public void setCruiseSpeed(double CruiseSpeed) { // getter and setter for cruiseSpeed
         this.cruiseSpeed = CruiseSpeed;
     }
 
@@ -62,7 +71,7 @@ public class BusClass {
         return cruiseSpeed;
     }
 
-    public double getFuelBurnRate() {
+    public double getFuelBurnRate() { // getter and setter for fuelBurnRate
         return fuelBurnRate;
     }
 
@@ -70,10 +79,11 @@ public class BusClass {
         this.fuelBurnRate = fuelBurnRate;
     }
 
-    public String displayBusInfo() {
+    public String displayBusInfo() { // displays bus info in the format for the csv file
         String info = make + ", "
                 + model + ", "
                 + type + ", "
+                + fuelType + ", "   
                 + fuelCapacity + ", "
                 + fuelBurnRate + ", "
                 + cruiseSpeed;

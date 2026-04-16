@@ -15,7 +15,7 @@ public class BusManager {
     public ArrayList<BusClass> busList = new ArrayList<BusClass>();
     static String filename = "Project/Bus/Bus.csv";
     File file = new File(filename);
-    String line, make, model, type;
+    String line, make, model, type, fuelType;
     double fuelBurnRate, fuelCapacity, cruiseSpeed;
 
     public BusManager() throws FileNotFoundException {
@@ -30,10 +30,11 @@ public class BusManager {
                 make = columns[0];
                 model = columns[1];
                 type = columns[2];
-                fuelCapacity = Double.parseDouble(columns[3]);
-                fuelBurnRate = Double.parseDouble(columns[4]);
-                cruiseSpeed = Double.parseDouble(columns[5]);
-                BusClass bus = new BusClass(make, model, type, fuelCapacity, fuelBurnRate,
+                fuelType = columns[3]; // added fuelType to the list of columns
+                fuelCapacity = Double.parseDouble(columns[4]); // shifted fuelCapacity to column 4 and added fuelType to column 3
+                fuelBurnRate = Double.parseDouble(columns[5]); // shifted fuelBurnRate to column 5 and added fuelType to column 3
+                cruiseSpeed = Double.parseDouble(columns[6]); // shifted cruiseSpeed to column 6 and added fuelType to column 3
+                BusClass bus = new BusClass(make, model, type, fuelType, fuelCapacity, fuelBurnRate,
                         cruiseSpeed);
                 busList.add(bus);
 

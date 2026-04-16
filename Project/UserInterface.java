@@ -611,7 +611,7 @@ public class UserInterface {
         Font inputFont = new Font("SansSerif", Font.PLAIN, 18);
         Font tableFont = new Font("SansSerif", Font.PLAIN, 16);
 
-        String tablename[] = { "Make", "Model", "Type", "Fuel Capacity", "Fuel Burn Rate", "Cruise Speed" };
+        String tablename[] = { "Make", "Model", "Type", "Fuel Type","Fuel Capacity", "Fuel Burn Rate", "Cruise Speed" };
         DefaultTableModel busTable = new DefaultTableModel(tablename, 0);
         JTable table = new JTable(busTable);
 
@@ -624,7 +624,7 @@ public class UserInterface {
         for (Object b : bManager.busList) {
             String s = ((BusClass) b).displayBusInfo();
             String[] col = s.split(", ");
-            busTable.addRow(new Object[] { col[0], col[1], col[2], col[3], col[4], col[5] });
+            busTable.addRow(new Object[] { col[0], col[1], col[2], col[3], col[4], col[5], col[6]});
         }
 
         buspanel.add(pane, BorderLayout.CENTER);
@@ -663,6 +663,15 @@ public class UserInterface {
         typeBox.setMaximumSize(boxSize);
         inputPanel.add(type);
         inputPanel.add(typeBox);
+        inputPanel.add(Box.createVerticalStrut(10));
+
+        JLabel fuelType = new JLabel("Fuel Type:"); // ADDED FUEL TYPE
+        fuelType.setFont(labelFont);
+        JTextField fuelTypeBox = new JTextField(15);
+        fuelTypeBox.setFont(inputFont);
+        fuelTypeBox.setMaximumSize(boxSize);
+        inputPanel.add(fuelType);
+        inputPanel.add(fuelTypeBox);
         inputPanel.add(Box.createVerticalStrut(10));
 
         JLabel cruiseSpeed = new JLabel("Cruise Speed:");
@@ -720,6 +729,7 @@ public class UserInterface {
                     makeBox.setText(bManager.busList.get(selectedRow).getMake());
                     modelBox.setText(bManager.busList.get(selectedRow).getModel());
                     typeBox.setText(bManager.busList.get(selectedRow).getType());
+                    fuelTypeBox.setText(bManager.busList.get(selectedRow).getFuelType()); // added fueltype
                     cruiseSpeedBox.setText(String.valueOf(bManager.busList.get(selectedRow).getCruiseSpeed()));
                     fuelBurnRateBox.setText(String.valueOf(bManager.busList.get(selectedRow).getFuelBurnRate()));
                     fuelCapacityBox.setText(String.valueOf(bManager.busList.get(selectedRow).getFuelCapacity()));
@@ -727,6 +737,7 @@ public class UserInterface {
                     makeBox.setText("");
                     modelBox.setText("");
                     typeBox.setText("");
+                    fuelTypeBox.setText(""); // ADDED
                     cruiseSpeedBox.setText("");
                     fuelBurnRateBox.setText("");
                     fuelCapacityBox.setText("");
@@ -746,6 +757,7 @@ public class UserInterface {
             String makeVal = makeBox.getText().trim();
             String modelVal = modelBox.getText().trim();
             String typeVal = typeBox.getText().trim();
+            String fuelTypeVal = fuelTypeBox.getText().trim(); // ADDED
             String speedTxt = cruiseSpeedBox.getText().trim();
             String burnTxt = fuelBurnRateBox.getText().trim();
             String capTxt = fuelCapacityBox.getText().trim();
@@ -777,6 +789,10 @@ public class UserInterface {
                 errorLog.append("- 'Type' has invalid symbols or is empty.\n");
                 isValid = false;
             }
+             if (!fuelTypeVal.matches(alphaNumRegex)) { // ADDED
+                errorLog.append("- 'Fuel Type' has invalid symbols or is empty.\n");
+                isValid = false;
+            }
 
             String numericRegex = "^[0-9]*\\.?[0-9]+$";
             if (!speedTxt.matches(numericRegex)) {
@@ -799,6 +815,7 @@ public class UserInterface {
                 currentBus.setMake(makeVal);
                 currentBus.setModel(modelVal);
                 currentBus.setType(typeVal);
+                currentBus.setFuelType(fuelTypeVal); // ADDED FUEL TYPE
                 currentBus.setCruiseSpeed(Double.parseDouble(speedTxt));
                 currentBus.setFuelBurnRate(Double.parseDouble(burnTxt));
                 currentBus.setFuelCapacity(Double.parseDouble(capTxt));
@@ -806,9 +823,10 @@ public class UserInterface {
                 busTable.setValueAt(makeVal, selectedRow, 0);
                 busTable.setValueAt(modelVal, selectedRow, 1);
                 busTable.setValueAt(typeVal, selectedRow, 2);
-                busTable.setValueAt(capTxt, selectedRow, 3);
-                busTable.setValueAt(burnTxt, selectedRow, 4);
-                busTable.setValueAt(speedTxt, selectedRow, 5);
+                busTable.setValueAt(fuelTypeVal, selectedRow, 3); // ADDED
+                busTable.setValueAt(capTxt, selectedRow, 4); // SHIFTED +1
+                busTable.setValueAt(burnTxt, selectedRow, 5); // SHIFTED +1
+                busTable.setValueAt(speedTxt, selectedRow, 6); //SHIFTED +1
 
                 try {
                     bManager.save();
@@ -850,6 +868,7 @@ public class UserInterface {
             BusClass nb = new BusClass();
             nb.setMake(finalMake);
             nb.setType("Standard");
+            nb.setFuelType("Unknown"); // ADDED DEFAULT FUEL TYPE
             nb.setCruiseSpeed(0.0);
             nb.setFuelBurnRate(0.0);
             nb.setFuelCapacity(0.0);
@@ -859,6 +878,7 @@ public class UserInterface {
                     nb.getMake(),
                     nb.getModel(),
                     nb.getType(),
+                    nb.getFuelType(), // ADDED FUEL TYPE
                     nb.getFuelCapacity(),
                     nb.getFuelBurnRate(),
                     nb.getCruiseSpeed()
@@ -870,6 +890,7 @@ public class UserInterface {
             makeBox.setText(nb.getMake());
             modelBox.setText(nb.getModel());
             typeBox.setText(nb.getType());
+            fuelTypeBox.setText(nb.getFuelType()); // ADDED
             cruiseSpeedBox.setText(String.valueOf(nb.getCruiseSpeed()));
             fuelBurnRateBox.setText(String.valueOf(nb.getFuelBurnRate()));
             fuelCapacityBox.setText(String.valueOf(nb.getFuelCapacity()));
