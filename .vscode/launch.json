@@ -9,35 +9,24 @@
             "name": "UserInterface",
             "request": "launch",
             "mainClass": "Project.UserInterface",
-            "projectName": "BusProject_63b10fca"
         },
         {
             "type": "java",
             "name": "BusManager",
             "request": "launch",
             "mainClass": "Project.Bus.BusManager",
-            "projectName": "BusProject_5353025e"
         },
         {
             "type": "java",
             "name": "CSVReadTest",
             "request": "launch",
             "mainClass": "CSVReadTest",
-            "projectName": "BusProject_5353025e"
-        },
-        {
-            "type": "java",
-            "name": "UserInterface",
-            "request": "launch",
-            "mainClass": "Project.UserInterface",
-            "projectName": "BusProject_5353025e"
         },
         {
             "type": "java",
             "name": "JFrameTest",
             "request": "launch",
             "mainClass": "JFrameTest",
-            "projectName": "BusProject_5353025e"
         },
         {
             "type": "jdk",
