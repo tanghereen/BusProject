@@ -55,11 +55,13 @@ public class UserInterface {
     }
 
     public static void main(String[] args) {
-        JOptionPane.showMessageDialog(null,
-                "THIS SOFTWARE IS NOT TO BE USED FOR ROUTE PLANNING PURPOSES. \r\n" + // added warning message per project guidelines
-                "\r\n Unauthorized access is prohibited. Click OK to proceed.",
-                "Security Alert",
-                JOptionPane.WARNING_MESSAGE);
+        JOptionPane.showMessageDialog(
+        null,
+        "THIS SOFTWARE IS NOT TO BE USED FOR ROUTE PLANNING PURPOSES.\n\n" +
+        "Unauthorized access is prohibited. Click OK to proceed.",
+        "Security Alert",
+        JOptionPane.WARNING_MESSAGE
+    );
         new UserInterface().initialize();
     }
 
@@ -803,7 +805,7 @@ public class UserInterface {
         Font inputFont = new Font("SansSerif", Font.PLAIN, 18);
         Font tableFont = new Font("SansSerif", Font.PLAIN, 16);
 
-        String tablename[] = { "Make", "Model", "Type", "Fuel Type","Fuel Capacity", "Fuel Burn Rate", "Cruise Speed" };
+        String tablename[] = { "Make", "Model", "Type", "Fuel Type", "Fuel Capacity", "Fuel Burn Rate", "Cruise Speed" };
         DefaultTableModel busTable = new DefaultTableModel(tablename, 0);
         JTable table = new JTable(busTable);
 
@@ -814,9 +816,19 @@ public class UserInterface {
         JScrollPane pane = new JScrollPane(table);
 
         for (Object b : bManager.busList) {
-            String s = ((BusClass) b).displayBusInfo();
-            String[] col = s.split(", ");
-            busTable.addRow(new Object[] { col[0], col[1], col[2], col[3], col[4], col[5], col[6]});
+            // String s = ((BusClass) b).displayBusInfo();
+            // String[] col = s.split(", ");
+               BusClass bus = (BusClass) b;
+
+            busTable.addRow(new Object[] {
+                bus.getMake(),
+                bus.getModel(),
+                bus.getType(),
+                bus.getFuelType(),
+                bus.getFuelCapacity(),
+                bus.getFuelBurnRate(),
+                bus.getCruiseSpeed()
+            });
         }
 
         buspanel.add(pane, BorderLayout.CENTER);
@@ -835,7 +847,7 @@ public class UserInterface {
         JComboBox<String> typeBox = new JComboBox<>(new String[] { "CityBus", "LongDistanceBus" });
         typeBox.setFont(inputFont);
         typeBox.setMaximumSize(boxSize);
-        inputPanel.add(type);
+        // inputPanel.add(type);
         inputPanel.add(typeBox);
         inputPanel.add(Box.createVerticalStrut(10));
 
@@ -906,7 +918,7 @@ public class UserInterface {
                 if (selectedRow != -1) {
                     makeBox.setText(bManager.busList.get(selectedRow).getMake());
                     modelBox.setText(bManager.busList.get(selectedRow).getModel());
-                    typeBox.setText(bManager.busList.get(selectedRow).getType());
+                    typeBox.setSelectedItem(bManager.busList.get(selectedRow).getType());
                     fuelTypeBox.setText(bManager.busList.get(selectedRow).getFuelType()); // added fueltype
                     cruiseSpeedBox.setText(String.valueOf(bManager.busList.get(selectedRow).getCruiseSpeed()));
                     fuelBurnRateBox.setText(String.valueOf(bManager.busList.get(selectedRow).getFuelBurnRate()));
@@ -914,7 +926,7 @@ public class UserInterface {
                 } else {
                     makeBox.setText("");
                     modelBox.setText("");
-                    typeBox.setText("");
+                    typeBox.setSelectedItem(null);
                     fuelTypeBox.setText(""); // ADDED
                     cruiseSpeedBox.setText("");
                     fuelBurnRateBox.setText("");
@@ -934,7 +946,7 @@ public class UserInterface {
 
             String makeVal = makeBox.getText().trim();
             String modelVal = modelBox.getText().trim();
-            String typeVal = typeBox.getText().trim();
+            String typeVal = (String) typeBox.getSelectedItem(); // fixed, supposed to be different from the others
             String fuelTypeVal = fuelTypeBox.getText().trim(); // ADDED
             String speedTxt = cruiseSpeedBox.getText().trim();
             String burnTxt = fuelBurnRateBox.getText().trim();
@@ -1068,7 +1080,7 @@ public class UserInterface {
 
             makeBox.setText(nb.getMake());
             modelBox.setText(nb.getModel());
-            typeBox.setText(nb.getType());
+            typeBox.setSelectedItem(nb.getType());
             fuelTypeBox.setText(nb.getFuelType()); // ADDED
             cruiseSpeedBox.setText(String.valueOf(nb.getCruiseSpeed()));
             fuelBurnRateBox.setText(String.valueOf(nb.getFuelBurnRate()));
@@ -1236,7 +1248,11 @@ public class UserInterface {
 
                 try {
                     sManager.save();
-                    routeGraph.vertices.get(selectedRow).setStation(newStationObj);
+                    Node node = routeGraph.getNodeByName(sManager.stationList.get(selectedRow).getName());
+
+                    if (node != null) {
+                        node.setStation(newStationObj);
+                    }
 
                     frame.repaint();
                     JOptionPane.showMessageDialog(frame, "Station Updated Successfully!");
