@@ -48,7 +48,8 @@ public class UserInterface {
 
     public static void main(String[] args) {
         JOptionPane.showMessageDialog(null,
-                "System Warning: Unauthorized access is prohibited. Click OK to proceed.",
+                "THIS SOFTWARE IS NOT TO BE USED FOR ROUTE PLANNING PURPOSES. \r\n" + // added warning message per project guidelines
+                "\r\n Unauthorized access is prohibited. Click OK to proceed.",
                 "Security Alert",
                 JOptionPane.WARNING_MESSAGE);
         new UserInterface().initialize();

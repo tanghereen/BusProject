@@ -1,7 +1,6 @@
 package Project.Route;
 
 import java.util.*;
-
 public class RoutePlanner {
     private WeightedGraph graph;
 
