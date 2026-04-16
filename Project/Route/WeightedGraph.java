@@ -10,8 +10,9 @@ import java.io.IOException;
 public class WeightedGraph {
     public ArrayList<Node> vertices = new ArrayList<>();
 
-    public void addVertex(Node v) {
-        vertices.add(v);
+    public void addVertex(BusStationClass station) {
+
+        vertices.add(new Node(station));
     }
 
     // Creates an undirected (two-way) connection
@@ -37,7 +38,7 @@ public class WeightedGraph {
     public void buildGraphFromCSV(BusStationManager sManager, String csvPath) {
         // 1. Populate all vertices
         for (BusStationClass station : sManager.stationList) {
-            addVertex(new Node(station));
+            addVertex(station);
         }
 
         // 2. Read the CSV to build edges
@@ -134,5 +135,20 @@ public class WeightedGraph {
         } catch (java.io.IOException ex) {
             ex.printStackTrace();
         }
+    }
+
+    public double calculateDistanceMiles(BusStationClass s1, BusStationClass s2) {
+        final int R = 3958; // Radius of the earth in miles
+
+        double latDistance = Math.toRadians(s2.getLatitude() - s1.getLatitude());
+        double lonDistance = Math.toRadians(s2.getLongitude() - s1.getLongitude());
+
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(s1.getLatitude())) * Math.cos(Math.toRadians(s2.getLatitude()))
+                        * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return R * c; // Returns distance in miles
     }
 }

@@ -1,8 +1,9 @@
 package Project.Bus;
 
-// finally made it
-
+// this class is the basic bus class and is used as the shared attributes and methods of the city and long distance buses
 public class BusClass {
+
+    // This block is used to declare the Basic attributes of a bus
     String make = "make";
     String model = "model";
     String type = "type";
@@ -21,8 +22,10 @@ public class BusClass {
         this.cruiseSpeed = cruiseSpeed;
     }
 
+    // This is a blank constructor
     public BusClass() {
     }
+
 
     public String getMake() { // getter and setter for make
         return make;
@@ -30,6 +33,16 @@ public class BusClass {
 
     public void setMake(String make) {
         this.make = make;
+    }
+     // This funtion is to display the bus info in a string.
+    public String displayBusInfo() {
+        String info = make + ", "
+                + type + ", "
+                + fuelType + ", "
+                + fuelCapacity + ", "
+                + fuelBurnRate + ", "
+                + cruiseSpeed;
+        return info;
     }
 
     public String getModel() { // getter and setter for model
@@ -77,16 +90,5 @@ public class BusClass {
 
     public void setFuelBurnRate(double fuelBurnRate) {
         this.fuelBurnRate = fuelBurnRate;
-    }
-
-    public String displayBusInfo() { // displays bus info in the format for the csv file
-        String info = make + ", "
-                + model + ", "
-                + type + ", "
-                + fuelType + ", "   
-                + fuelCapacity + ", "
-                + fuelBurnRate + ", "
-                + cruiseSpeed;
-        return info;
     }
 }
