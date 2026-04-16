@@ -674,12 +674,12 @@ public class UserInterface {
             sb.append("Est. Fuel Required: ").append(String.format("%.2f", fuelRequired)).append(" gallons\n");
             sb.append("Fuel Capacity: ").append(String.format("%.2f", capacity)).append(" gallons\n\n");
             if (canComplete) {
-                sb.append("✅ STATUS: ROUTE APPROVED (Fuel Sufficient)\n");
+                sb.append("ROUTE APPROVED\n");
             } else {
                 if (speed <= 0) {
-                    sb.append("❌ STATUS: ROUTE FAILED (Bus cruise speed is 0)\n");
+                    sb.append("ROUTE FAILED (Bus cruise speed is 0)\n");
                 } else {
-                    sb.append("❌ STATUS: ROUTE FAILED (Insufficient Fuel Capacity)\n");
+                    sb.append("ROUTE FAILED (Insufficient Fuel Capacity)\n");
                 }
             }
             sb.append("--------------------------------------------------\n\n");
