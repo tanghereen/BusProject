@@ -1,5 +1,6 @@
 package Project;
 
+//These are the imports
 import Project.Bus.*;
 import Project.BusStation.*;
 import Project.Route.*;
@@ -31,6 +32,7 @@ public class UserInterface {
     private RoutePlanner routePlanner;
 
     JComboBox<String> busDropdown = new JComboBox<>();
+    JComboBox<String> stationDropDown = new JComboBox<>();
     private int selectedRow = -1;
 
     // This Function used to call the different managers and planners into objects
@@ -101,7 +103,7 @@ public class UserInterface {
 
     // This funtion is to return the menu bar to allow the user to swich between the
     // different pannels
-    private JMenuBar createMenuBar() {
+    private JMenuBar createMenuBar(Account currentUser) {
 
         // This is the menu bar object to be returned
         JMenuBar menuBar = new JMenuBar();
@@ -125,6 +127,18 @@ public class UserInterface {
         logoutItem.setFont(menuFont);
         exit.setFont(menuFont);
 
+        // This will show all of the listed users using the software. 
+        // Only for ADMIN accounts only. 
+        if (currentUser.isAdmin()) {
+            JMenuItem seeAccounts = new JMenuItem("See All Accounts");
+            seeAccounts.setFont(menuFont);
+
+            seeAccounts.addActionListener(e -> showAllAccountsDialog());
+            menu.addSeparator(); 
+            menu.add(seeAccounts); 
+            menu.addSeparator();
+        }
+
         // This is what happens when exit is selected on the menu bar and will close the
         // applicaiton.
         exit.addActionListener(e -> {
@@ -143,6 +157,12 @@ public class UserInterface {
             for (Object bObj : bManager.busList) {
                 BusClass b = (BusClass) bObj;
                 busDropdown.addItem(b.getMake() + " " + b.getModel());
+            }
+
+            stationDropDown.removeAllItems();
+            for (Object sObj : sManager.stationList) {
+                BusStationClass s = (BusStationClass) sObj;
+                stationDropDown.addItem(s.getName());
             }
 
             // This is to make the frame check which card it should be showing
@@ -243,11 +263,15 @@ public class UserInterface {
                 return;
             }
 
-            // Verify password
+            // Verify password and role for user/admin
             String inputHash = hashPassword(password);
             if (inputHash.equals(storedHash)) {
+                String roleCSV = getRoleForUser(username); 
+                Account loggedInAccount = new Account(username, inputHash, roleCSV); 
+                frame.setJMenuBar(createMenuBar(loggedInAccount)); 
+
                 cardLayout.show(cardPanel, "ROUTEPLANNER");
-                frame.setJMenuBar(createMenuBar());
+                frame.setJMenuBar(createMenuBar(loggedInAccount));
                 frame.revalidate();
                 userField.setText("");
                 passField.setText("");
@@ -266,12 +290,114 @@ public class UserInterface {
         return loginPanel;
     }
 
+    private String getRoleForUser(String username) {
+        try (BufferedReader reader = new BufferedReader(new FileReader("Project\\Accounts.csv"))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] parts = line.split(", ");
+            if (parts.length >= 3 && parts[0].equalsIgnoreCase(username)) {
+                return parts[2]; 
+            }
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+    return "USER";
+    }
+
+    private void showAllAccountsDialog() {
+    // 1. Create the dialog HERE so it's in scope for this method
+    JDialog managementDialog = new JDialog(frame, "Account Management", true);
+    managementDialog.setLayout(new BorderLayout(10, 10));
+
+    DefaultListModel<String> listModel = new DefaultListModel<>();
+    JList<String> accountList = new JList<>(listModel);
+    
+    // Call the refresh method and pass the model to it
+    refreshAccountList(listModel);
+
+    JButton removeBtn = new JButton("Remove Selected Account");
+    removeBtn.addActionListener(e -> {
+        String selected = accountList.getSelectedValue();
+        if (selected != null) {
+            String userToRemove = selected.split(" - ")[0];
+            performAccountRemoval(userToRemove);
+            refreshAccountList(listModel); // Refresh the list after deleting
+        }
+    });
+
+    managementDialog.add(new JScrollPane(accountList), BorderLayout.CENTER);
+    managementDialog.add(removeBtn, BorderLayout.SOUTH);
+
+    managementDialog.pack();
+    managementDialog.setSize(300, 400);
+    managementDialog.setLocationRelativeTo(frame);
+    managementDialog.setVisible(true);
+}
+
+private void performAccountRemoval(String targetUser) {
+    File originalFile = new File("Project\\Accounts.csv");
+    File tempFile = new File("Project\\Accounts_temp.csv");
+
+    try (BufferedReader reader = new BufferedReader(new FileReader(originalFile));
+         BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))) {
+
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] parts = line.split(", ");
+            // Only write the line to the new file if it's NOT the target user
+            if (parts.length > 0 && !parts[0].equalsIgnoreCase(targetUser)) {
+                writer.write(line);
+                writer.newLine();
+            }
+        }
+    } catch (IOException ex) {
+        ex.printStackTrace();
+    }
+
+    // Delete the old file and rename the new one
+    if (originalFile.delete()) {
+        tempFile.renameTo(originalFile);
+    } else {
+        JOptionPane.showMessageDialog(frame, "Error updating the database file.");
+    }
+}
+
+    private void refreshAccountList(DefaultListModel<String> model) {
+    model.clear(); // Clear the old list before reloading
+    File file = new File("Project\\Accounts.csv");
+    
+    if (!file.exists()) return;
+
+    try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] parts = line.split(", ");
+            if (parts.length >= 3) {
+                // This updates the selectable JList in your dialog
+                model.addElement(parts[0].trim() + " - (" + parts[2].trim() + ")");
+            }
+        }
+    } catch (IOException e) {
+        System.out.println("Error refreshing list: " + e.getMessage());
+    }
+}
+
     private void showAddAccountDialog() {
+        
         JDialog dialog = new JDialog(frame, "Create New Account", true);
         dialog.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        String[] roles = {"USER", "ADMIN"}; 
+        JComboBox<String> roleComboBox = new JComboBox<>(roles);
+        gbc.gridx = 3; gbc.gridy = 0; 
+        dialog.add(new JLabel("Account Type"), gbc);
+        gbc.gridx = 4; 
+        dialog.add(roleComboBox, gbc);
+        gbc.gridy= 4; 
 
         JTextField newUsernameField = new JTextField(15);
         JPasswordField newPasswordField = new JPasswordField(15);
@@ -303,6 +429,7 @@ public class UserInterface {
             String username = newUsernameField.getText();
             String password = new String(newPasswordField.getPassword());
             String verify = new String(verifyPasswordField.getPassword());
+            String role = (String) roleComboBox.getSelectedItem();
 
             if (username.isEmpty() || password.isEmpty()) {
                 JOptionPane.showMessageDialog(dialog, "Fields cannot be empty! Please try again.", "Error",
@@ -333,7 +460,7 @@ public class UserInterface {
                 try (BufferedWriter writer = new BufferedWriter(new FileWriter("Project\\Accounts.csv", true))) {
                     // write the hash of the password (SHA-256)
                     String securePassword = hashPassword(password);
-                    writer.write(username + ", " + securePassword);
+                    writer.write(username + ", " + securePassword + ", " + role);
                     writer.newLine();
 
                     JOptionPane.showMessageDialog(dialog, "The account '" + username + "' was stored successfully!");
@@ -427,12 +554,11 @@ public class UserInterface {
         controlPanel.add(busDropdown);
         controlPanel.add(Box.createVerticalStrut(15));
 
-        JComboBox<String> addDropdown = new JComboBox<>();
-        addDropdown.setFont(largeFont);
+        stationDropDown.setFont(largeFont);
         for (BusStationClass s : sManager.stationList) {
-            addDropdown.addItem(s.getName());
+            stationDropDown.addItem(s.getName());
         }
-        addDropdown.setMaximumSize(new Dimension(400, 40));
+        stationDropDown.setMaximumSize(new Dimension(400, 40));
 
         JButton addBtn = new JButton("Add Station");
         addBtn.setFont(largeFont);
@@ -479,7 +605,7 @@ public class UserInterface {
 
         controlPanel.add(routeLabel);
         controlPanel.add(Box.createVerticalStrut(10));
-        controlPanel.add(addDropdown);
+        controlPanel.add(stationDropDown);
         controlPanel.add(Box.createVerticalStrut(5));
         controlPanel.add(addBtn);
         controlPanel.add(Box.createVerticalStrut(10));
@@ -533,7 +659,7 @@ public class UserInterface {
         routePan.add(centerPanel, BorderLayout.CENTER);
 
         addBtn.addActionListener(e -> {
-            String selected = (String) addDropdown.getSelectedItem();
+            String selected = (String) stationDropDown.getSelectedItem();
             if (selected != null) {
                 routeStopsModel.addElement(selected);
             }
@@ -657,6 +783,16 @@ public class UserInterface {
                 finalRoute.addAll(legPath);
             }
 
+            Node firstStation = routeGraph.getNodeByName(routeStopsModel.firstElement());
+            Node lastStation = routeGraph.getNodeByName(routeStopsModel.lastElement());
+
+            double startLat = firstStation.getStation().getLatitude();
+            double startLon = firstStation.getStation().getLongitude();
+            double endLat = lastStation.getStation().getLatitude();
+            double endLon = lastStation.getStation().getLongitude();
+
+            String overallHeading = routePlanner.calculateHeading(startLat, startLon, endLat, endLon);
+
             int selectedBusIdx = busDropdown.getSelectedIndex();
             BusClass selectedBus = (BusClass) bManager.busList.get(selectedBusIdx);
 
@@ -670,7 +806,8 @@ public class UserInterface {
             boolean canComplete = (fuelRequired <= capacity) && (speed > 0);
 
             StringBuilder sb = new StringBuilder();
-            sb.append("Total Distance: ").append(String.format("%.2f", totalDistance)).append(" miles\n");
+            sb.append("Heading: ").append(overallHeading);
+            sb.append("\nTotal Distance: ").append(String.format("%.2f", totalDistance)).append(" miles\n");
             sb.append("Bus Selected: ").append(selectedBus.getMake()).append(" ").append(selectedBus.getModel())
                     .append("\n");
             sb.append("Est. Trip Time: ").append(String.format("%.2f", timeRequired)).append(" hours\n");
@@ -1225,7 +1362,31 @@ public class UserInterface {
                     isValid = false;
                     break;
                 }
+
             }
+
+            String alphaNumRegex = "^[a-zA-Z0-9 ]+$";
+            if (!nameVal.matches(alphaNumRegex)) {
+                errorLog.append("- 'Make' has invalid symbols or is empty.\n");
+                isValid = false;
+            }
+            // Check Latitude
+            try {
+                // This will fail if latTxt is empty, has an '@', letters, etc.
+                Double.parseDouble(latTxt); 
+            } catch (NumberFormatException e1) {
+                errorLog.append("- Latitude is incorrect (must be a valid number).\n");
+                isValid = false;
+            }
+
+            // Check Longitude
+            try {
+                Double.parseDouble(lonTxt);
+            } catch (NumberFormatException e1) {
+                errorLog.append("- Longitude is incorrect (must be a valid number).\n");
+                isValid = false;
+            }
+
 
             if (!isValid) {
                 JOptionPane.showMessageDialog(frame, errorLog.toString(), "Input Errors", JOptionPane.ERROR_MESSAGE);
@@ -1269,8 +1430,9 @@ public class UserInterface {
             }
 
             try {
-                sManager.save();
+                sManager.stationList.remove(selectedRow);
                 routeGraph.removeNode(routeGraph.getNodeByName(sManager.stationList.get(selectedRow).getName()));
+                sManager.save();
                 frame.repaint();
                 JOptionPane.showMessageDialog(frame, "Station Removed Successfully!");
             } catch (Exception ex) {

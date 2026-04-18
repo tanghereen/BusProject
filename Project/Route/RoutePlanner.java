@@ -54,4 +54,31 @@ public class RoutePlanner {
 
         return new ArrayList<>(); // Empty list means no path found
     }
+    public String calculateHeading(double lat1, double lon1, double lat2, double lon2) {
+        // Convert coordinates to radians
+        double lat1Rad = Math.toRadians(lat1);
+        double lat2Rad = Math.toRadians(lat2);
+        double lon1Rad = Math.toRadians(lon1);
+        double lon2Rad = Math.toRadians(lon2);
+        
+        double dLon = lon2Rad - lon1Rad;
+
+        // Calculate forward azimuth
+        double y = Math.sin(dLon) * Math.cos(lat2Rad);
+        double x = Math.cos(lat1Rad) * Math.sin(lat2Rad) - Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dLon);
+
+        double heading = Math.toDegrees(Math.atan2(y, x));
+        
+        // Normalize to 0-360 degrees
+        heading = (heading + 360) % 360;
+
+        String compassDirection = getCompassDirection(heading);
+        return String.format("%.1f° %s", heading, compassDirection);
+    }
+
+    private String getCompassDirection(double heading) {
+        String[] directions = {"N", "N@", "W", "SW", "S", "SE", "E", "NE", "N"};
+        // Divide the 360 degrees into 8 sectors of 45 degrees
+        return directions[(int) Math.round(((heading % 360) / 45))];
+    }
 }
