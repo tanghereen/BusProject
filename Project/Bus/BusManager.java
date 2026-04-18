@@ -11,37 +11,22 @@ import java.io.PrintWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-// This class is used to add all buses to an active list from the CSV when the program is running and add, edit, or remove them.
-// This class also saves the bus list to the CSV
 public class BusManager {
-
-    // This is the active bus list
     public ArrayList<BusClass> busList = new ArrayList<BusClass>();
-
-    // This block is declaring the file to read and write buses
     static String filename = "Project/Bus/Bus.csv";
     File file = new File(filename);
     String line, make, model, type, fuelType;
     double fuelBurnRate, fuelCapacity, cruiseSpeed;
 
-    // This is the declaration of a blank bus
-    BusClass bus;
-
-    // This is a blank constructor
     public BusManager() throws FileNotFoundException {
     }
 
-    // This Function is used to add all the buses into a list by reading the CSV.
     public void listBuses() {
-
-        // This line sets up the Buffered reader to read the file
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            while ((line = br.readLine()) != null) { // This line splits the file into lines add loops
-
-                // This line splits each attribute of the the bus into different Strings
-                String[] columns = line.split(",\\s*");
-
-                // This block is used to declare which columns are which for clearity
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            while ((line = br.readLine()) != null) {
+                line = line.replace("\"", "");
+                String[] columns = line.split(", ");
                 make = columns[0];
                 model = columns[1];
                 type = columns[2];
@@ -52,17 +37,15 @@ public class BusManager {
                 BusClass bus = new BusClass(make, model, type, fuelType, fuelCapacity, fuelBurnRate,
                         cruiseSpeed);
                 busList.add(bus);
+
             }
-            // This is the error handling
+            br.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    // This function is used to save all buses into the CSV
     public void save() throws IOException {
-
-        // This block is used to write to the file using the bus info
         try (PrintWriter pw = new PrintWriter(new FileWriter(file))) {
             for (BusClass b : busList) {
                 String line = b.displayBusInfo();
@@ -71,14 +54,8 @@ public class BusManager {
         }
     }
 
-    // This function is used to remove a bus from the active list as well as the CSV
-    // file. It returns a boolean based on if it was able to delete the bus
     public boolean removeBus(int row) {
-
-        // This line is used to make sure the list has that many buses
         if (row >= 0 && row < busList.size()) {
-
-            // This Block removes the bus the saves the file.
             busList.remove(row);
             try {
                 save();
