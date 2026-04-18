@@ -1,2 +1,3 @@
-ma2, model3, LongDistanceBus, Gas, 10.0, 10.0, 20.0
-Nem, model, type, Diesel, 0.0, 0.0, 0.0
+ma, model3, LongDistanceBus, Gas, 10.0, 10.0, 20.0
+Nem, model, LongDistanceBus, Diesel, 0.0, 0.0, 0.0
+Bus, U, CityBus, Gas, 120.0, 2.0, 15.0

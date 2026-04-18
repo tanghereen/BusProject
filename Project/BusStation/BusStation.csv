@@ -1,6 +1,7 @@
-Aiken, 150.5, 183.1, false
+Aiken, 150.5, 183.1, True
 Augusta, 160.0, 190.0, True
 California, 200.0, 220.0, True
 Texas, 180.0, 210.0, false
 New York, 190.0, 200.0, false
-Cool Station, 350.0, 240.0, false
+Cool Station, 350.0, 240.0, True
+New Station3, 0.0, 0.0, false

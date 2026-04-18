@@ -32,6 +32,7 @@ public class UserInterface {
     private RoutePlanner routePlanner;
 
     JComboBox<String> busDropdown = new JComboBox<>();
+    JComboBox<String> stationDropDown = new JComboBox<>();
     private int selectedRow = -1;
 
     // This Function used to call the different managers and planners into objects
@@ -153,6 +154,12 @@ public class UserInterface {
             for (Object bObj : bManager.busList) {
                 BusClass b = (BusClass) bObj;
                 busDropdown.addItem(b.getMake() + " " + b.getModel());
+            }
+
+            stationDropDown.removeAllItems();
+            for (Object sObj : sManager.stationList) {
+                BusStationClass s = (BusStationClass) sObj;
+                stationDropDown.addItem(s.getName());
             }
 
             // This is to make the frame check which card it should be showing
@@ -544,12 +551,11 @@ private void performAccountRemoval(String targetUser) {
         controlPanel.add(busDropdown);
         controlPanel.add(Box.createVerticalStrut(15));
 
-        JComboBox<String> addDropdown = new JComboBox<>();
-        addDropdown.setFont(largeFont);
+        stationDropDown.setFont(largeFont);
         for (BusStationClass s : sManager.stationList) {
-            addDropdown.addItem(s.getName());
+            stationDropDown.addItem(s.getName());
         }
-        addDropdown.setMaximumSize(new Dimension(400, 40));
+        stationDropDown.setMaximumSize(new Dimension(400, 40));
 
         JButton addBtn = new JButton("Add Station");
         addBtn.setFont(largeFont);
@@ -596,7 +602,7 @@ private void performAccountRemoval(String targetUser) {
 
         controlPanel.add(routeLabel);
         controlPanel.add(Box.createVerticalStrut(10));
-        controlPanel.add(addDropdown);
+        controlPanel.add(stationDropDown);
         controlPanel.add(Box.createVerticalStrut(5));
         controlPanel.add(addBtn);
         controlPanel.add(Box.createVerticalStrut(10));
@@ -650,7 +656,7 @@ private void performAccountRemoval(String targetUser) {
         routePan.add(centerPanel, BorderLayout.CENTER);
 
         addBtn.addActionListener(e -> {
-            String selected = (String) addDropdown.getSelectedItem();
+            String selected = (String) stationDropDown.getSelectedItem();
             if (selected != null) {
                 routeStopsModel.addElement(selected);
             }
@@ -1301,7 +1307,31 @@ private void performAccountRemoval(String targetUser) {
                     isValid = false;
                     break;
                 }
+
             }
+
+            String alphaNumRegex = "^[a-zA-Z0-9 ]+$";
+            if (!nameVal.matches(alphaNumRegex)) {
+                errorLog.append("- 'Make' has invalid symbols or is empty.\n");
+                isValid = false;
+            }
+            // Check Latitude
+            try {
+                // This will fail if latTxt is empty, has an '@', letters, etc.
+                Double.parseDouble(latTxt); 
+            } catch (NumberFormatException e1) {
+                errorLog.append("- Latitude is incorrect (must be a valid number).\n");
+                isValid = false;
+            }
+
+            // Check Longitude
+            try {
+                Double.parseDouble(lonTxt);
+            } catch (NumberFormatException e1) {
+                errorLog.append("- Longitude is incorrect (must be a valid number).\n");
+                isValid = false;
+            }
+
 
             if (!isValid) {
                 JOptionPane.showMessageDialog(frame, errorLog.toString(), "Input Errors", JOptionPane.ERROR_MESSAGE);
