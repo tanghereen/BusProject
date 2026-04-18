@@ -780,6 +780,16 @@ private void performAccountRemoval(String targetUser) {
                 finalRoute.addAll(legPath);
             }
 
+            Node firstStation = routeGraph.getNodeByName(routeStopsModel.firstElement());
+            Node lastStation = routeGraph.getNodeByName(routeStopsModel.lastElement());
+
+            double startLat = firstStation.getStation().getLatitude();
+            double startLon = firstStation.getStation().getLongitude();
+            double endLat = lastStation.getStation().getLatitude();
+            double endLon = lastStation.getStation().getLongitude();
+
+            String overallHeading = routePlanner.calculateHeading(startLat, startLon, endLat, endLon);
+
             int selectedBusIdx = busDropdown.getSelectedIndex();
             BusClass selectedBus = (BusClass) bManager.busList.get(selectedBusIdx);
 
@@ -793,7 +803,8 @@ private void performAccountRemoval(String targetUser) {
             boolean canComplete = (fuelRequired <= capacity) && (speed > 0);
 
             StringBuilder sb = new StringBuilder();
-            sb.append("Total Distance: ").append(String.format("%.2f", totalDistance)).append(" miles\n");
+            sb.append("Heading: ").append(overallHeading);
+            sb.append("\nTotal Distance: ").append(String.format("%.2f", totalDistance)).append(" miles\n");
             sb.append("Bus Selected: ").append(selectedBus.getMake()).append(" ").append(selectedBus.getModel())
                     .append("\n");
             sb.append("Est. Trip Time: ").append(String.format("%.2f", timeRequired)).append(" hours\n");
@@ -1371,8 +1382,9 @@ private void performAccountRemoval(String targetUser) {
             }
 
             try {
-                sManager.save();
+                sManager.stationList.remove(selectedRow);
                 routeGraph.removeNode(routeGraph.getNodeByName(sManager.stationList.get(selectedRow).getName()));
+                sManager.save();
                 frame.repaint();
                 JOptionPane.showMessageDialog(frame, "Station Removed Successfully!");
             } catch (Exception ex) {
