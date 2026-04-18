@@ -33,13 +33,9 @@ public class UserInterface {
     JComboBox<String> busDropdown = new JComboBox<>();
     private int selectedRow = -1;
 
-    // This Function used to call the different managers and pannels into objects
+    // This Function used to call the different managers and planners into objects
     public UserInterface() {
         try {
-            routePanel();
-            logInPanel();
-            manageBus();
-            manageBusStation();
 
             // This is the bus manager
             bManager = new BusManager();
@@ -90,10 +86,10 @@ public class UserInterface {
         cardPanel = new JPanel(cardLayout);
 
         // This block initializes the different panels based of the functions
-        cardPanel.add(loginPanel, "LOGIN");
-        cardPanel.add(routePanel, "ROUTEPLANNER");
-        cardPanel.add(buspanel, "MANAGEBUS");
-        cardPanel.add(stationpanel, "MANAGESTATION");
+        cardPanel.add(logInPanel(), "LOGIN");
+        cardPanel.add(routePanel(), "ROUTEPLANNER");
+        cardPanel.add(manageBus(), "MANAGEBUS");
+        cardPanel.add(manageBusStation(), "MANAGESTATION");
 
         // This block adds the plannels into the frame and shows them to the user
         frame.add(cardPanel);
@@ -189,7 +185,7 @@ public class UserInterface {
         return menuBar;
     }
 
-    private void logInPanel() {
+    private JPanel logInPanel() {
         loginPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
@@ -263,6 +259,8 @@ public class UserInterface {
         {
             showAddAccountDialog();
         });
+
+        return loginPanel;
     }
 
     private void showAddAccountDialog() {
@@ -392,8 +390,8 @@ public class UserInterface {
 
     // This is the main route pannel and is used to add or remove connection of the
     // graph or to plan a route and see if the route is possible.
-    private void routePanel() {
-        routePanel = new JPanel(new BorderLayout());
+    private JPanel routePanel() {
+        JPanel routePan = new JPanel(new BorderLayout());
 
         JPanel leftCardPanel = new JPanel(new CardLayout());
         CardLayout leftLayout = (CardLayout) leftCardPanel.getLayout();
@@ -528,8 +526,8 @@ public class UserInterface {
 
         GraphPanel centerPanel = new GraphPanel();
 
-        routePanel.add(leftCardPanel, BorderLayout.WEST);
-        routePanel.add(centerPanel, BorderLayout.CENTER);
+        routePan.add(leftCardPanel, BorderLayout.WEST);
+        routePan.add(centerPanel, BorderLayout.CENTER);
 
         addBtn.addActionListener(e -> {
             String selected = (String) addDropdown.getSelectedItem();
@@ -694,6 +692,7 @@ public class UserInterface {
             resultsTextArea.setText(sb.toString());
             leftLayout.show(leftCardPanel, "RESULTS");
         });
+        return routePan;
     }
 
     private class GraphPanel extends JPanel {
@@ -796,7 +795,7 @@ public class UserInterface {
         }
     }
 
-    private void manageBus() {
+    private JPanel manageBus() {
         JPanel buspanel = new JPanel(new BorderLayout());
 
         Font labelFont = new Font("SansSerif", Font.BOLD, 18);
@@ -805,7 +804,7 @@ public class UserInterface {
 
         String tablename[] = { "Make", "Model", "Type", "Fuel Type", "Fuel Capacity", "Fuel Burn Rate",
                 "Cruise Speed" };
-        busTable = new DefaultTableModel(tablename, 0);
+        DefaultTableModel busTable = new DefaultTableModel(tablename, 0);
         JTable table = new JTable(busTable);
 
         table.setFont(tableFont);
@@ -1043,6 +1042,8 @@ public class UserInterface {
             fuelBurnRateBox.setText(String.valueOf(nb.getFuelBurnRate()));
             fuelCapacityBox.setText(String.valueOf(nb.getFuelCapacity()));
         });
+
+        return buspanel;
     }
 
     private void autoAdd(JPanel p, JLabel l, JComponent c, Font f, Dimension d) {
@@ -1054,7 +1055,7 @@ public class UserInterface {
         p.add(Box.createVerticalStrut(10));
     }
 
-    private void manageBusStation() {
+    private JPanel manageBusStation() {
         JPanel stationpanel = new JPanel(new BorderLayout());
 
         Font labelFont = new Font("SansSerif", Font.BOLD, 18);
@@ -1271,5 +1272,6 @@ public class UserInterface {
             }
         });
 
+        return stationpanel;
     }
 }
